@@ -17,10 +17,13 @@ body {
     background-image: radial-gradient(#eaddd3 0.5px, transparent 0.5px);
     background-size: 20px 20px;
     -webkit-font-smoothing: antialiased;
+    /* 移动端优化：防止水平溢出 */
+    overflow-x: hidden; 
 }
 
 .serif { font-family: 'Noto Serif SC', serif; }
 
+/* 基础卡片样式 */
 .nude-card {
     background: var(--nude-card);
     border-radius: 40px;
@@ -28,20 +31,56 @@ body {
     border: 1px solid rgba(234, 221, 211, 0.5);
     backdrop-filter: blur(10px);
     position: relative;
+    padding: 2rem; /* 默认电脑端间距 */
+    transition: box-shadow 0.3s ease;
 }
 
+.nude-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* 选项卡片优化 */
 .option-card {
     background: #fff;
     border: 1px solid #eeebe7;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     cursor: pointer;
     position: relative;
+    padding: 1.5rem;
+    border-radius: 1.25rem;
 }
 
-.option-card:hover {
-    border-color: var(--nude-highlight);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(201, 154, 109, 0.1);
+/* style.css */
+
+/* 只有在支持 hover 的设备（如 PC 端鼠标）上才触发特效 */
+@media (hover: hover) {
+    .option-card:hover {
+        border-color: var(--nude-highlight);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(201, 154, 109, 0.1);
+        cursor: pointer;
+    }
+}
+
+/* 针对移动端的优化：点击时的即时反馈（可选） */
+@media (hover: none) {
+    .option-card:active {
+        background-color: rgba(201, 154, 109, 0.05); /* 点击瞬间的微弱色块反馈 */
+        transform: scale(0.98); /* 轻微按压感 */
+        transition: transform 0.1s;
+    }
+}
+
+/* 移除移动端点击时浏览器默认出现的蓝色高亮边框[cite: 13] */
+.option-card {
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.3s ease; /* 确保所有状态过渡平滑[cite: 13] */
+}
+
+/* 移动端专属点击态：按下时轻微缩小 */
+.option-card:active {
+    transform: scale(0.97);
+    background-color: #fffaf5;
 }
 
 .option-card.selected {
@@ -49,6 +88,7 @@ body {
     background-color: #fffaf5;
 }
 
+/* 按钮样式 */
 .btn-action {
     background: var(--nude-primary);
     color: white;
@@ -62,6 +102,7 @@ body {
     transform: translateY(-2px);
 }
 
+/* 返回按钮：增加点击热区 */
 .btn-back {
     position: absolute;
     top: 2rem;
@@ -74,8 +115,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px; /* 稍微增大，符合手机操作规范 */
+    height: 44px;
     border-radius: 50%;
 }
 
@@ -86,6 +127,7 @@ body {
     transform: translateX(-3px); 
 }
 
+/* 动画 */
 .fade-in { animation: fadeIn 0.8s ease-out forwards; }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
@@ -101,37 +143,83 @@ body {
     color: var(--nude-primary);
 }
 
-/* 进度条样式 */
-.stat-bar {
+/* 进度条 */
+.dimension-progress-bg {
     width: 100%;
-    height: 4px;
-    background: #f0f0f0;
-    border-radius: 2px;
+    height: 8px;
+    background-color: #f5f5f4;
+    border-radius: 9999px;
     overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.stat-progress {
+.dimension-progress-fill {
     height: 100%;
-    background: var(--nude-highlight);
     transition: width 1s ease-out;
+    background: linear-gradient(90deg, #d4a373, #a98467);
+    border-radius: inherit;
 }
 
-/* 结果页特有样式 */
-.result-badge {
-    background: linear-gradient(135deg, #eaddd3 0%, #fdfcfb 100%);
-    border: 1px solid #c99a6d;
+/* =========================================
+   移动端响应式适配 (重点修改区域)
+   ========================================= */
+@media (max-width: 640px) {
+    body {
+        padding: 1rem !important; /* 减少页面外边距 */
+    }
+
+    .nude-card {
+        padding: 1.5rem !important; /* 手机端卡片内边距减小 */
+        border-radius: 28px; /* 稍微圆润一点 */
+    }
+
+    /* 防止返回按钮在小屏遮挡标题 */
+    .btn-back {
+        top: 1rem !important;
+        left: 0.75rem !important;
+    }
+
+    /* 欢迎页面文字调整 */
+    #welcome-screen h1 {
+        font-size: 2.25rem !important;
+        margin-bottom: 1.5rem;
+    }
+
+    /* 选项文字大小微调 */
+    .option-card {
+        padding: 1.25rem !important;
+        font-size: 0.95rem;
+    }
+
+    /* 动作按钮字母间距调整，防止溢出 */
+    .btn-action {
+        letter-spacing: 0.15em;
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+    }
+
+    /* 进度条在手机上加粗更显眼 */
+    .dimension-progress-bg {
+        height: 12px;
+    }
+
+    /* 结果页报告栅格强行单列 */
+    .report-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+
+    /* 历史记录时间轴位置微调 */
+    #history-list-container::before {
+        left: 10px;
+    }
+    .history-card::before {
+        left: -14px;
+    }
 }
 
-.dimension-card {
-    transition: all 0.3s ease;
-}
-
-.dimension-card:hover {
-    background-color: #fff;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-
-/* 性格倾向列表样式 */
+/* --- 其他原有功能样式保留 --- */
 .pattern-item {
     display: flex;
     justify-content: space-between;
@@ -140,92 +228,10 @@ body {
     border-bottom: 1px solid #f0ede9;
 }
 
-/* 人格侧写标签叠影 */
-.persona-tag-bg {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    font-size: 4rem;
-    font-family: 'Noto Serif SC', serif;
-    font-style: italic;
-    color: #f0ede9;
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* 社交处方信笺样式 */
-.prescription-card {
-    background: #fffdf9;
-    border: 2px dashed #eaddd3;
-    border-radius: 32px;
-    position: relative;
-}
-
-.prescription-badge {
-    position: absolute;
-    top: -12px;
-    left: 40px;
-    background: #fff;
-    padding: 0 15px;
-    font-weight: bold;
-    letter-spacing: 0.2em;
-    font-size: 0.75rem;
-}
-
-.rx-symbol {
-    font-family: 'Noto Serif SC', serif;
-    font-size: 2rem;
-    color: #eaddd3;
-    opacity: 0.5;
-}
-
-/* --- 维度分析进度条样式 --- */
-
-/* 进度条容器 */
-.dimension-progress-bg {
-    width: 100%;
-    height: 8px; /* 约等于 h-2 */
-    background-color: #f5f5f4; /* stone-100 */
-    border-radius: 9999px; /* rounded-full */
-    overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-}
-
-/* 进度条填充主体 */
-.dimension-progress-fill {
-    height: 100%;
-    transition: width 1s ease-out; /* duration-1000 */
-    background: linear-gradient(90deg, #d4a373, #a98467);
-    border-radius: inherit;
-}
-
-/* 进度条闪光动画 */
-.dimension-progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    background: linear-gradient(
-        90deg, 
-        rgba(255,255,255,0) 0%, 
-        rgba(255,255,255,0.2) 50%, 
-        rgba(255,255,255,0) 100%
-    );
-    animation: shine 3s infinite;
-}
-
-/* 报告卡片增强 */
-.nude-card {
-    background-color: white;
-    border: 1px solid #f5f5f4; /* stone-100 */
-    border-radius: 1.5rem; /* rounded-3xl */
-    padding: 2rem; /* p-8 */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: box-shadow 0.3s ease;
-}
-
-.nude-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+.font-mono-report {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
 }
 
 @keyframes shine {
@@ -233,67 +239,70 @@ body {
     to { transform: translateX(100%); }
 }
 
-.font-mono-report {
-    font-family: 'Courier New', Courier, monospace;
+/* 确保弹窗内的滚动条美观 */
+#feedback-area .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+}
+#feedback-area .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: var(--nude-accent);
+    border-radius: 10px;
+}
+
+/* 弹窗特有的动画微调 */
+#feedback-area.flex {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* --- 社交处方 (Rx) 专用视觉样式 --- */
+.prescription-card {
+    background: #fffcf9; /* 极淡的暖纸色 */
+    border: 1.5px dashed var(--nude-accent);
+    border-radius: 24px;
+    position: relative;
+    margin-top: 2rem;
+    box-shadow: 0 10px 30px -10px rgba(201, 154, 109, 0.15);
+}
+
+.rx-symbol {
+    font-family: "Georgia", serif;
+    font-size: 3.5rem;
+    color: var(--nude-highlight);
+    opacity: 0.15;
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    line-height: 1;
+}
+
+.prescription-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--nude-highlight);
+    color: white;
+    border-radius: 8px;
+    font-size: 10px;
     font-weight: bold;
-}
-
-/* 响应式：手机端单列显示 */
-@media (max-width: 640px) {
-    .report-grid {
-        display: grid;
-        grid-template-columns: 1fr !important;
-        gap: 0.75rem;
-    }
-}
-
-/* 增大百分比数字的样式 */
-.font-mono-report {
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: 700;
-    font-size: 0.85rem !important; /* 强制放大字号 */
-    letter-spacing: 0.05em;
-}
-
-/* 进度条容器高度稍微加粗，增加视觉存在感 */
-.dimension-progress-bg {
-    width: 100%;
-    height: 10px; /* 从 8px 增加到 10px */
-    background-color: #f5f5f4;
-    border-radius: 9999px;
-    overflow: hidden;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
     position: relative;
+    z-index: 1;
 }
 
-#history-list-container {
-    position: relative;
-    padding-left: 20px;
+/* 逻辑与赞美的冷暖对比 */
+.rx-formula {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
 }
 
-/* 垂直时间轴线 */
-#history-list-container::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 100px;
-    bottom: 0;
-    width: 1px;
-    background: #eaddd3;
+.formula-item.cold {
+    color: var(--nude-text-muted); /* 逻辑的冷 */
+    border-left: 2px solid #e5e7eb;
+    padding-left: 10px;
 }
 
-.history-card {
-    position: relative;
-}
-
-/* 时间轴小圆点 */
-.history-card::before {
-    content: '';
-    position: absolute;
-    left: -24px;
-    top: 24px;
-    width: 8px;
-    height: 8px;
-    background: #c99a6d;
-    border-radius: 50%;
-    border: 2px solid #fff;
+.formula-item.warm {
+    color: var(--nude-highlight); /* 赞美的热 */
+    font-weight: 600;
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>社交炼金术：人性弱点深度修行版</title>
+    <title>影响力</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
         
         <div id="welcome-screen" class="nude-card p-12 md:p-20 text-center fade-in">
             <div class="mb-8 opacity-50 text-[10px] tracking-[0.5em] uppercase">Human Relations Mastery</div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-8 text-nude-primary serif leading-tight">社交炼金术</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-8 text-nude-primary serif leading-tight">影响力</h1>
             <p class="text-nude-text-muted mb-12 text-sm md:text-base leading-loose max-w-md mx-auto">
                 
             </p>
@@ -66,15 +66,39 @@
 
             <div id="options-container" class="space-y-4 mb-10"></div>
 
-            <div id="feedback-area" class="hidden fade-in pt-10 border-t border-stone-100">
-                <div id="feedback-label" class="text-[10px] font-bold px-3 py-1 bg-stone-100 text-stone-500 rounded uppercase w-fit mb-4"></div>
-                <p id="feedback-content" class="text-sm text-stone-500 leading-loose mb-8"></p>
-                <div class="p-4 bg-stone-50 rounded-2xl border border-nude-accent/20 mb-8">
-                    <p class="text-[10px] text-nude-highlight font-bold mb-2 uppercase">原著深度解析：</p>
-                    <p id="persona-analysis" class="text-[11px] text-stone-400 leading-relaxed"></p>
-                </div>
-                <button onclick="handleNextClick()" class="btn-action w-full py-5 rounded-2xl text-xs uppercase">继续</button>
+            <!-- 修改后的反馈弹窗结构 -->
+<div id="feedback-area" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <!-- 背景遮罩 -->
+    <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm"></div>
+    
+    <!-- 弹窗主体 -->
+    <div class="nude-card w-full max-w-lg relative z-10 fade-in shadow-2xl p-8 md:p-10">
+        <div id="feedback-label" class="text-[10px] font-bold px-3 py-1 bg-stone-100 text-stone-500 rounded uppercase w-fit mb-4"></div>
+        
+        <div class="max-h-[60vh] overflow-y-auto pr-2 mb-8">
+            <p id="feedback-content" class="text-sm md:text-base text-stone-600 leading-loose mb-6"></p>
+            <div class="p-5 bg-stone-50 rounded-2xl border border-nude-accent/20">
+                <p class="text-[10px] text-nude-highlight font-bold mb-2 uppercase tracking-widest">原著深度解析：</p>
+                <p id="persona-analysis" class="text-xs md:text-sm text-stone-400 leading-relaxed italic"></p>
             </div>
+        </div>
+        
+
+        
+        <!-- 在 feedback-area 的按钮部分修改如下 -->
+<div class="flex gap-3 mt-6">
+    <!-- 返回重选按钮 -->
+    <button onclick="handleBackToChoice()" class="flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest border border-stone-200 text-stone-400 hover:bg-stone-50 transition-colors">
+        返回重选
+    </button>
+    
+    <!-- 继续修行按钮 -->
+    <button onclick="handleNextClick()" class="flex-[2] btn-action py-4 rounded-2xl text-[10px] uppercase tracking-widest">
+        理解了，继续修行
+    </button>
+</div>
+    </div>
+</div>
         </div>
 
         <div id="end-screen" class="nude-card p-12 hidden fade-in">

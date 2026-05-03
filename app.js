@@ -142,41 +142,70 @@ function renderScene() {
     document.getElementById('feedback-area').classList.add('hidden');
 }
 
+function handleBackToChoice() {
+    // 1. 关闭弹窗
+    const feedbackArea = document.getElementById('feedback-area');
+    feedbackArea.classList.add('hidden');
+    feedbackArea.classList.remove('flex');
+
+    // 2. 撤销数据变动[cite: 3]
+    const lastAction = state.history.pop(); // 移除最后一条历史记录
+    if (lastAction) {
+        state.gameScore -= lastAction.score; // 扣回分数
+        state.patterns[lastAction.selectedType]--; // 减去性格计数
+        
+        // 扣除维度分
+        const currentDim = chapters[state.currentChapIdx].dimension;
+        if (state.dimensionScores.hasOwnProperty(currentDim)) {
+            state.dimensionScores[currentDim] -= lastAction.score;
+        }
+    }
+
+    // 3. 恢复选项 UI 状态[cite: 3]
+    document.querySelectorAll('#options-container .option-card').forEach(item => {
+        item.style.pointerEvents = 'auto'; // 恢复点击
+        item.style.opacity = '1';          // 恢复透明度
+        item.classList.remove('selected'); // 移除选中样式
+    });
+}
+
 function handleChoice(opt, el) {
-    // 基础积分与人格统计
+    // 基础积分与人格统计逻辑保持不变
     state.gameScore += opt.score;
     state.patterns[opt.type]++;
-// 获取当前场景的标题，用于后续报告的精确追溯
+    
     const currentScene = chapters[state.currentChapIdx].scenes[state.currentSceneIdx];
-
     state.history.push({
-        sceneTitle: currentScene.title, // 新增：保存场景标题
+        sceneTitle: currentScene.title,
         selectedType: opt.type,
         score: opt.score,
         screenId: 'game-screen'
     });
 
-    // 维度分累加逻辑保持不变
     const currentDim = chapters[state.currentChapIdx].dimension;
     if (state.dimensionScores.hasOwnProperty(currentDim)) {
         state.dimensionScores[currentDim] += opt.score;
     }
 
-    // UI 反馈处理
+    // --- 修改 UI 反馈为弹窗模式 ---
     const feedbackArea = document.getElementById('feedback-area');
-    feedbackArea.classList.remove('hidden');
+    
+    // 设置内容
     document.getElementById('feedback-label').innerText = opt.score >= 40 ? '炼金成功' : '掉入陷阱';
     document.getElementById('feedback-content').innerText = opt.feedback;
     document.getElementById('persona-analysis').innerText = opt.persona;
 
-    // 选项置灰逻辑
+    // 显示弹窗 (使用 flex 覆盖 hidden)
+    feedbackArea.classList.remove('hidden');
+    feedbackArea.classList.add('flex');
+
+    // 选项置灰逻辑保持不变[cite: 3]
     document.querySelectorAll('#options-container .option-card').forEach(item => {
         item.style.pointerEvents = 'none';
         item.style.opacity = '0.3';
     });
     el.style.opacity = '1';
     el.classList.add('selected');
-    feedbackArea.scrollIntoView({ behavior: 'smooth' });
 }
 
 // 在 app.js 中替换或新增此辅助函数
@@ -203,8 +232,12 @@ function getAnalyzedDimensions() {
     };
 }
 
-// 下一步
 function handleNextClick() {
+    // 关闭反馈弹窗
+    const feedbackArea = document.getElementById('feedback-area');
+    feedbackArea.classList.add('hidden');
+    feedbackArea.classList.remove('flex');
+
     const ch = chapters[state.currentChapIdx];
     if (state.currentSceneIdx + 1 < ch.scenes.length) {
         state.currentSceneIdx++;
@@ -226,6 +259,46 @@ function showFinalReport() {
     );
     const pattern = reportRemedies[dominant];
     const { best, worst } = getAnalyzedDimensions();
+
+    // 1. 先定义处方的 HTML 结构（逻辑是冷的，赞美是热的）
+// app_3.js
+const rxHtml = `
+        <div class="prescription-card p-8 text-left fade-in">
+            <div class="rx-symbol">Rx</div>
+            <div class="prescription-badge">社交修行处方 · ${pattern.tag}</div>
+            
+            <div class="rx-formula mb-6">
+                <div class="formula-item warm ${pattern.logicColor}">赞美是热的</div>
+                <div class="text-stone-300">|</div>
+                <div class="formula-item cold text-stone-400">逻辑是冷的</div>
+            </div>
+
+            <div class="space-y-6 relative z-10">
+                <section>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">◎ 修行心法</p>
+                    <p class="text-[15px] text-stone-700 leading-relaxed font-serif italic">
+                        “${pattern.mindset}”
+                    </p>
+                </section>
+
+                <div class="h-px bg-gradient-to-r from-nude-accent/50 to-transparent w-full"></div>
+
+                <section>
+                    <p class="text-[10px] font-bold text-nude-highlight uppercase tracking-widest mb-2">◎ 药方指示</p>
+                    <div class="text-sm text-stone-600 leading-loose">
+                        ${pattern.remedy}
+                    </div>
+                </section>
+
+                <section class="bg-stone-50/80 p-4 rounded-2xl border border-dashed border-nude-accent/50">
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">◎ 即刻炼金（每日练习）</p>
+                    <p class="text-xs text-stone-500 leading-relaxed">
+                        ${pattern.action}
+                    </p>
+                </section>
+            </div>
+        </div>
+    `;
 
     // 2. 追溯具体的“名场面”
     const bestMoment = state.history.find(h => {
@@ -315,7 +388,7 @@ function showFinalReport() {
                 <p class="text-[10px] mt-2 uppercase tracking-widest text-stone-400">修行最终评分</p>
             </div>
             <h2 class="text-2xl serif font-bold text-nude-primary mb-2 relative z-10">${pattern.title}</h2>
-            <p class="text-sm text-stone-500 leading-relaxed mb-6 px-4 relative z-10">${pattern.desc}</p>
+            
             
             <div class="bg-stone-50 p-6 rounded-3xl border-l-4 border-nude-highlight text-left mb-6">
                 <p class="text-[10px] font-bold text-nude-highlight uppercase mb-2 tracking-widest">深度修行洞察</p>
@@ -348,15 +421,12 @@ function showFinalReport() {
             </div>
         </div>
 
-        <div class="prescription-card p-8 text-left">
-            <div class="prescription-badge text-nude-highlight">社交处方 (Rx)</div>
-            <div class="rx-symbol mb-2">Rx</div>
-            <p class="text-sm text-stone-600 leading-loose">${pattern.remedy}</p>
-        </div>
+
 
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9 5l7 7-7 7"></path></svg>
     </button>
-    
+    ${rxHtml} <!-- 在这里插入生成的处方卡片[cite: 10] -->
+
     <button onclick="location.reload()" class="w-full py-4 bg-stone-100 rounded-3xl text-sm text-stone-500 font-bold">
         重新开始修行
     </button>
